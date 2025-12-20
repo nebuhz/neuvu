@@ -1,6 +1,7 @@
 import streamlit as st
 from sklearn.linear_model import LinearRegression
 import feedparser
+import random
 
 st.sidebar.title("Danh sách nghệ sĩ")
 selected_artist = st.sidebar.radio("Chọn nghệ sĩ:", ['Adele', 'Lady Gaga', 'Anime songs'])
@@ -20,7 +21,7 @@ videos = {
 }
 
 st.title("Ứng dụng giải trí và sức khỏe")
-tab1, tab2, tab3, tab4,tab5,tab6 = st.tabs(["MV yêu thích", "Dự đoán giờ ngủ", "Đọc báo", "Kiểm tra sức khỏe","Luong nuoc moi ngay","Số bước chân cần đi"])
+tab1, tab2, tab3, tab4,tab5,tab6,tab7,tab8 = st.tabs(["MV yêu thích", "Dự đoán giờ ngủ", "Đọc báo", "Kiểm tra sức khỏe","Luong nuoc moi ngay","Số bước chân cần đi","Thời gian ngủ mỗi ngày","Giai tri"])
 
 with tab1:
     st.header(f"Các bài hát của {selected_artist}")
@@ -63,6 +64,7 @@ with tab2:
             st.success("Lượng ngủ lí tưởng, hãy giữ thói quen tốt này!")
 with tab3:
     st.header("Tin tức mới nhất")
+    # Gộp tab với nhau 
     tabA, tabB,tabC = st.tabs(["Sports","...","uhmmm"])
     with tabA:
             st.header("The latest news from VNExpress")
@@ -133,3 +135,38 @@ with tab6:
             st.warning("Bạn nên đi **6 000 - 7 000** bước chân mỗi ngày")
         else:
             st.error("Xin hãy kiểm tra lại thông tin.")
+with tab7:
+    st.title("Kiểm tra thời gian ngủ lý tưởng")
+    tabA, tabB = st.tabs(["cho trẻ em dưới 1 tuổi","Hơn một tuổi"])
+    with tabA:
+        tháng = st.number_input("Nhập số tháng tuổi của em bé bạn",min_value=0, max_value=12, value=2)
+        if st.button('Tính thời gian ngủ theo tháng tuổi'):
+            if tháng < 4:
+                st.info('Cần ngủ 14 - 17 tiếng mỗi ngày')
+            else:
+                st.info('Cần ngủ 12 - 15 tiếng mỗi ngày')
+    with tabB:
+        tuoi = st.number_input("Nhập số tuổi của bạn",max_value=100,min_value=1,value=5)
+        if tuoi <3:
+            st.info("Cần ngủ 11 -14 tiếng mỗi ngày")
+
+with tab8:
+    tabA, tabB = st.tabs(["Game doan so","Game tung xuc sac"])
+    with tabA:
+        st.header("Game doan so bi mat tu 1 -100")
+        if "secret" not in st.session_state:
+            st.session_state.secret = random.randint(1,100)
+            st.session_state.tries = 0
+        guess = st.number_input("Nhap so du doan 1 - 100", min_value=1, max_value=100,step=1)
+        if st.button("Doan"):
+            st.session_state.tries +=1
+            if guess < st.session_state.secret:
+                st.warning("So bi mat lon hon")
+            elif guess >st.session_state.secret:
+                st.warning("So bi mat nho hon")
+            else:
+                st.success(f"chinh xac! Ban doan dung sau {st.session_state.tries} lan!")
+        if st.button("Choi lai"):
+            st.session_state.secret = random.randint(1,100)
+            st.session_state.tries = 0
+
