@@ -20,19 +20,18 @@ videos = {
     ]
 }
 
-st.title("Ứng dụng giải trí và sức khỏe")
-tab1, tab2, tab3, tab4,tab5,tab6,tab7,tab8 = st.tabs(["MV yêu thích", "Dự đoán giờ ngủ", "Đọc báo", "Kiểm tra sức khỏe","Luong nuoc moi ngay","Số bước chân cần đi","Thời gian ngủ mỗi ngày","Giai tri"])
+st.title("Ứng dụng giải trí")
+
+tab1, tab2, tab3, tab4, tab5, tab6,tab7 = st.tabs(["MV Yêu thích", "Dự án giờ ngủ", "Tin tức mới nhất", "Kiểm tra sức khỏe", "Sport", "Kiểm tra thời gian ngủ","Giai tri"])
 
 with tab1:
-    st.header(f"Các bài hát của {selected_artist}")
-    for title, url in videos[selected_artist]:
+    st.header(f"Các bài hát của{select_artist}")
+    for title, url in videos[select_artist]:
         st.subheader(title)
-        st.video(url)  # ✅ fixed parentheses
+        st.video(url)
 
 with tab2:
-    st.header("Dự đoán giờ đi ngủ mỗi đêm")
-
-    # Dữ liệu mẫu: [tuổi, mức độ hoạt động, thời gian dùng màn hình]
+    ("Dự đoán giờ ngủ mỗi đêm")
     x = [
         [10, 1, 8],
         [20, 5, 6],
@@ -42,115 +41,137 @@ with tab2:
         [40, 4, 3]
     ]
     y = [10, 8, 6, 7, 9.5, 9]
-
     model = LinearRegression()
     model.fit(x, y)
-
-    st.write("Nhập thông tin cá nhân:")
-    age = st.number_input("Tuổi của bạn", min_value=5, max_value=100, value=25)
-    activity = st.slider("Mức độ hoạt động thể chất (1 = ít, 10 = rất nhiều)", 1, 10, 5)
-    screen_time = st.number_input("Thời gian dùng màn hình trong 1 ngày (giờ)", min_value=0, max_value=24, value=2)
-
+    st.write("Nhập thông tin cá nhân: ")
+    age = st.number_input("Tuổi của bạn", min_value = 5, max_value = 100, value = 25)
+    activity = st.slider("Mức độ hoạt động thể chất(1 = ít, 10 = rất nhiều)", 1, 10, 5)
+    screen_time = st.number_input("Thời gian dùng màn hình trong 1 ngày(giờ)", min_value = 0, max_value = 24, value = 6)
     if st.button("Dự đoán ngay"):
         input_data = [[age, activity, screen_time]]
         result = model.predict(input_data)[0]
-        st.success(f"Bạn nên ngủ khoảng {result:.1f} giờ mỗi đêm")
-
+        st.success(f"Bạn nên ngủ khoảng{result:.1f} giờ mỗi đêm")
         if result < 6.5:
-            st.warning("Bạn cần ngủ nhiều hơn để cải thiện sức khỏe")
+            st.warning("Có thể bạn cần nghỉ ngơi nhiều hơn")
         elif result > 9:
-            st.info("Bạn đang hoạt động nhiều, bạn cần ngủ bù hợp lí")
+            st.info("Có thể bạn cần ngủ bù")
         else:
-            st.success("Lượng ngủ lí tưởng, hãy giữ thói quen tốt này!")
+            st.success("Thời gian ngủ hợp lý")
 with tab3:
     st.header("Tin tức mới nhất")
-    # Gộp tab với nhau 
-    tabA, tabB,tabC = st.tabs(["Sports","...","uhmmm"])
+    tabA, tabB = st.tabs(['Tin tức mới nhất từ VnExpress', 'Cập nhật giá vàng từ Vietnamnet'])
     with tabA:
-            st.header("The latest news from VNExpress")
-    feed = feedparser.parse("https://vietnamnet.vn/rss/the-thao.rss")
+        st.header("Tin tức mới nhất")
+        feed = feedparser.parse("https://vnexpress.net/rss/tin-moi-nhat.rss")
+        for entry in feed.entries[:5]:
+            st.subheader(entry.title)
+            st.write(entry.published)
+            st.write(entry.link)
+    
+    with tabB:
+        st.header("Cập nhật giá vàng")
+        feed = feedparser.parse("https://vietnamnet.vn/rss/kinh-doanh.rss")
+        gold_news = [entry for entry in feed.entries if "vàng" in entry.title.lower() or "giá vàng" in entry.summary.lower()]
+
+        if gold_news:
+            for entry in gold_news[:5]:
+                st.subheader(entry.title)
+                st.write(entry.published)
+                st.write(entry.link)
+        else:
+            st.warning("Không tìm thấy bản tin giá vàng gần đây")
+
+with tab4:
+    st.header("Kiểm tra sức khỏe")
+    tabC, tabD, tabE = st.tabs(["Kiểm tra sức khỏe", "BMI", "Luong Nuoc Can Uong"])
+    with tabC:
+        cân_nặng = st.number_input("Nhập cân nặng của bạn(kg)", min_value=10.0, max_value=200.0, value=60.0,step=0.1)
+        chiều_cao = st.number_input("Nhập chiều cao của bạn(m)", min_value=1.0, max_value=2.5, value=1.7, step=0.01)
+        bmi_min = 18.5
+        bmi_max = 24.9
+        cân_nặng_min = bmi_min * (chiều_cao **2)
+        cân_nặng_max = bmi_max * (cân_nặng ** 2)
+        giam = cân_nặng - cân_nặng_max
+
+        if st.button("Tính BMI"):
+            Bmi = cân_nặng / (chiều_cao ** 2)
+            st.success(f"Chỉ số BMI của bạn là: {Bmi:.2f}")
+
+            if Bmi < 18.5:
+                st.warning("Bạn đang thiếu cân, nên ăn uống đầy đủ hơn")
+                tang = cân_nặng_min - cân_nặng
+                st.info(f"ban can tang {tang : .2f}")
+            elif 18.5 <= Bmi < 25:
+                st.info("Bạn có cân nặng bình thường, hãy duy trì cân nặng")
+            elif 25 <= Bmi < 30:
+                st.warning("Bạn đang thừa cân, nên giảm cân")
+
+            else:
+                st.error("Bạn đang béo phì, nên gặp chuyên gia dinh dưỡng hoặc bác sĩ để được tư vấn")
+
+    with tabD:
+        st.title("Khuyến nghị lượng nước uống mỗi ngày")
+        tuoi = st.number_input("Nhập tuổi của bạn:", min_value=1, max_value=100, value=18, step=1)
+        if st.button("Kiểm tra lượng nước cần uống"):
+            if tuoi < 4:
+                st.info("Khuyến nghị: 1.3 lít/ngày")
+            elif 4 < tuoi <= 8:
+                st.info("Khuyến nghị: 1.7 lít/ngày")
+            elif 9 <= tuoi <= 13:
+                st.info("Khuyến nghị: 2.1-2.4 lít/ngày")
+            elif 14 <= tuoi <= 18:
+                st.info("Khuyến nghị: 2.3-3.3 lít/ngày")
+            elif 19 <= tuoi <= 50:
+                st.info("Khuyến nghị: 2.7 lít/ngày với nữ, 3.7 lít/ngày đối với nam")
+            elif tuoi > 50:
+                st.info("Khuyến nghị: Khoảng 2.5-3.0 lít/ngày (Phụ thuộc vào sức khỏe và mức độ vận động")
+            else:
+                st.warning("Vui lòng nhập độ tuổi hợp lệ")
+
+    with tabE:
+        st.title("Kiểm tra bước chân")
+        so_buoc_chan = st.number_input("Nhập tuổi của bạn: ", min_value=1, max_value=1000, value = 18, step=1)
+        if st.button("Kiểm tra bước chân của bạn"):
+            if so_buoc_chan < 18:
+                st.info("Bạn nên đi 12.000-15.000 bước/ngày")
+            elif 17<so_buoc_chan<=39:
+                st.info("Bạn nên đi 8.000-10.000 bước/ngày")
+            elif 39<so_buoc_chan<=64:
+                st.warning("Bạn nên đi 7.000-9.000 bước/ngày")
+            elif 64<so_buoc_chan<=100:
+                st.warning("Bạn nên đi 6.000-8.000 bước/ngày")
+            elif 100<so_buoc_chan<=300:
+                st.warning("Bạn nên đi dưới 100 bước, không nên vận động quá nhiều")
+            elif so_buoc_chan > 300:
+                st.warning("...")
+            else:
+                st.error("Vui lòng nhập lại thông tin")
+
+with tab5:
+    st.header("The latest news from VnExpress")
+    feed = feedparser.parse("http://vietnamnet.vn/rss/the-thao.rss")
     for entry in feed.entries[:10]:
         st.subheader(entry.title)
         st.write(entry.published)
         st.write(entry.link)
-    with tabB:
-            st.header("I hate men like you")
-    with tabC:
-            st.header("Theory channel")
 
-with tab4:
-    st.header("Kiem tra chi so BMI cua ban")
-    weight = st.number_input("Nhap can nang cua ban", max_value=200.0,min_value=10.0,value=50.0)
-    height = st.number_input("Nhap chieu cao cua ban", max_value=2.5,min_value=1.0,value=1.5)
-    min_acc_weight = 18.5 * (height ** 2)
-    max_acc_weight = 25 * (height ** 2)
-    if st.button("Tinh BMI"):
-        bmi = weight/(height ** 2)
-        st.success(f"Chi so BMI cua ban la: {bmi:.2f}")
-
-        if bmi <18.5:
-            st.warning("Ban dang thieu can, nen an uong on dinh hon")
-            weight_to_add = min_acc_weight - weight
-            st.write("Để trở về chỉ số BMI lý tưởng, hãy cố gắng tăng ít nhất", weight_to_add,"cân.")
-        elif 18.5 <= bmi <25:
-            st.info("Ban co can nang binh thuong. Hay tiep tuc duy tri loi song hien tai")
-        elif 25 <= bmi < 30:
-            st.warning("Ban dang thua can, hay can doi loi song va tap the duc nhieu")
-            weight_to_lose = weight - max_acc_weight
-            st.write("Để trở về chỉ số BMI lý tưởng, hãy cố gắng giảm ít nhất", weight_to_lose,"cân.")
-        else: 
-            st.error("Ban dang beo phi. Hay tham van chuyen gia dinh duong ngay lap tuc")
-            weight_to_lose = weight - max_acc_weight
-            st.write("Để trở về chỉ số BMI lý tưởng, hãy cố gắng giảm ít nhất", weight_to_lose,"cân.")
-with tab5:
-    st.title("Khuyen nghi luong nuoc uong moi ngay")
-    tuoi = st.number_input("Nhap do tuoi cua ban",min_value=1,max_value=100,value=15,step=1)
-    if st.button("Kiem tra luong nuoc can uong"):
-        if tuoi < 4:
-            st.info("1.3 lit/ngay")
-        elif 4 <= tuoi <=8:
-            st.info("1.7 lit/ngay")
-        elif 9<=tuoi<=13:
-            st.info("2.1 - 2.4 lit/ngay")
-        elif 14 <= tuoi <=18:
-            st.info("2.3 - 3.3 lit/ngay")
-        elif 19 <= tuoi <= 50:
-            st.info("2.7 - 3.7 lit/ngay")
-        elif tuoi >50:
-            st.info("2.5-3.0 lit/ngay (tuy vao suc khoe va muc do hoat dong)")
-        else:
-            st.warning("vui long nhap do tuoi hop le")
 with tab6:
-    st.title("Số bước chân cần đi mỗi ngày")
-    tuổi = st.number_input("Nhập độ tuổi của bạn",min_value=1, max_value=100,value=15,step=1)
-    print("Bạn",tuổi,"tuổi")
-    if st.button("Số bước chân khuyến khích mỗi ngày"):
-        if tuổi <18:
-            st.info("Bạn nên đi **12 000 - 15 000** bước chân mỗi ngày")
-        elif 17 < tuổi <=39:
-            st.info("Bạn nên đi **8 000 - 10 000** bước chân mỗi ngày")
-        elif 39 < tuổi <= 64:
-            st.warning("Bạn nên đi **7 000 - 9 000** bước chân mỗi ngày")
-        elif tuổi > 64:
-            st.warning("Bạn nên đi **6 000 - 7 000** bước chân mỗi ngày")
-        else:
-            st.error("Xin hãy kiểm tra lại thông tin.")
-with tab7:
-    st.title("Kiểm tra thời gian ngủ lý tưởng")
-    tabA, tabB = st.tabs(["cho trẻ em dưới 1 tuổi","Hơn một tuổi"])
-    with tabA:
-        tháng = st.number_input("Nhập số tháng tuổi của em bé bạn",min_value=0, max_value=12, value=2)
-        if st.button('Tính thời gian ngủ theo tháng tuổi'):
-            if tháng < 4:
-                st.info('Cần ngủ 14 - 17 tiếng mỗi ngày')
-            else:
-                st.info('Cần ngủ 12 - 15 tiếng mỗi ngày')
-    with tabB:
-        tuoi = st.number_input("Nhập số tuổi của bạn",max_value=100,min_value=1,value=5)
-        if tuoi <3:
-            st.info("Cần ngủ 11 -14 tiếng mỗi ngày")
+    st.title("Kiểm tra thời gian ngủ mỗi ngày")
 
-with tab8:
+    tuổi = st.number_input('Nhập độ tuổi của bạn: ',min_value=0, max_value=100, value=18, step = 1)
+    if tuổi < 3:
+        st.info("Cần ngủ 11-14 tiếng mỗi ngày")
+    elif tuổi < 6:
+        st.info("Cần ngủ 11-14 tiếng mỗi ngày")
+    elif tuổi < 14:
+        st.info("Cần tuổi 9-11 tiếng mỗi ngày")
+    elif tuổi < 18:
+        st.info("Cần ngủ 8-10 tiếng mỗi ngày")
+    elif tuổi <65:
+        st.info("Cần ngủ 7-9 tiếng mỗi ngày")
+    else:
+        st.info("Cần ngủ 7-8 tiếng mỗi ngày")
+with tab7:
     tabA, tabB = st.tabs(["Game doan so","Game tung xuc sac"])
     with tabA:
         st.header("Game doan so bi mat tu 1 -100")
